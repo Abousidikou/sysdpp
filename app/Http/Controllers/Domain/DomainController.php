@@ -28,6 +28,7 @@ class DomainController extends Controller
     public function index()
     {
         $domains = Domain::all();
+        //dd($domains);
         return view('admin.domain.domains',compact('domains'));
     }
 
