@@ -31,13 +31,16 @@ class ReadController extends Controller
     public function readIndicators($id,$subdomain, Request $request)
     {
         $levelstf = $request->all();
+        //dd(int($j));
+        //dd($levelstf);
         $levelToFilterWith = [];
-        foreach ($levelstf as $lev) {
-            if($lev != 'null') {
-                $levelToFilterWith[] = $lev;
+        foreach ($levelstf as $lev => $values) {
+            //dd($lev);
+            if($values != 'null' && $lev != 'filter' && $lev != 'plus') {
+                $levelToFilterWith[] = $values;
             }
         }
-
+        //dd($levelstf,$levelToFilterWith);
         $id_indicator = $id;
         $id_subdomain = $subdomain;
         $subdomain = SubDomain::find($id_subdomain);
@@ -48,8 +51,20 @@ class ReadController extends Controller
         session(['id_domain' => $id_domain]);
         session(['levelToFilterWith' => $levelToFilterWith]);
 
-        // dd($id_domain);
-        $infos = Data::where('id_indicator',$id)->orderBy('year','asc')->get();
+        /*   ------------------- start --------------------         */
+        $plus = intval($request->input('plus','0'));
+        $filter = intval($request->input('filter','10'));
+        $last_id = ($filter == 0) ? 0 : $plus;
+        //dd($filter,$plus);
+        $total = Data::where('id_indicator',$id)->orderBy('id','asc')->count();
+        //$c = 0;
+        $off = 500;
+        $infos = Data::where('id_indicator',$id)->orderBy('id','asc')->offset($last_id * $off)->limit($off)->get();
+        //dd($infos);
+        $isPlus = (($total - ($last_id * $off) - $infos->count()) >  0) ? true : false;
+        //dd($isPlus);
+
+        /*   ------------------- end --------------------         */
         $infoArray = [];
         $types = [];
         $allyears = [];
@@ -57,6 +72,7 @@ class ReadController extends Controller
         foreach($infos as $info)
         {
             $levels = $info->levels;
+            //dd($levels);
             $levelsArr = [];
             foreach($levels as $level) {
                 $type = $level->type->wording;
@@ -66,6 +82,7 @@ class ReadController extends Controller
                 $types[] = $type;
             }
         }
+        //dd($types);
         foreach($infos as $info)
         {
             $levels = $info->levels;
@@ -96,12 +113,18 @@ class ReadController extends Controller
             $info->years = [];
         }
 
+        /*foreach($infos as $info) {
+            echo $info;
+        }*/
+        //dd($infos);
+
         foreach($infos as $info) {
             if($levelToFilterWith != null && !empty($levelToFilterWith)) {
                 if(count(array_intersect($levelToFilterWith, $info->levels)) != count($levelToFilterWith)) {
                     continue;
                 }
             }
+            //dd(array_intersect($levelToFilterWith, $info->levels),count($levelToFilterWith),$levelstf,$info->levels);
             if (array_key_exists($info->lvhash, $infoArray)) {
                 $years = $infoArray[$info['lvhash']]['years'];
                 $years[$info->year] = $info->value;
@@ -111,7 +134,7 @@ class ReadController extends Controller
                 $infoArray[$info['lvhash']] = $info;
             }
         }
-
+        //dd($infoArray);
         $indicator = Indicators::where('id', $id_indicator)->first();
         $allLevels = $indicator->levels;
         $typeAndLevelArray = [];
@@ -128,7 +151,8 @@ class ReadController extends Controller
         }
         // dd($infoArray[$info->lvhash], $types);
         $request->flash();
-        return view('read.index',compact('infoArray', 'types', 'allyears', 'id_indicator','id_subdomain', 'subdomain', 'indicator', 'typeAndLevelArray'));
+        //dd($infoArray, $types, $allyears, $id_indicator,$id_subdomain, $subdomain, $indicator, $typeAndLevelArray);
+        return view('read.index',compact('infoArray', 'types', 'allyears', 'id_indicator','id_subdomain', 'subdomain', 'indicator', 'typeAndLevelArray','last_id', 'isPlus'));
     }
 
     public function export($indicator,$subdomain)
@@ -272,6 +296,16 @@ class ReadController extends Controller
 
         if($request->method() == 'POST') {
             $clevels = $request->clevels;
+            /************* start  
+             * 
+             * My part 
+             * 
+             * ********************/
+            if($request->clevels == null){
+                return redirect($request->path())->with('status', 'Select!');
+            }
+
+            /******************/
             $years = $request->years;
             $infos = [];
             foreach($infoArray as $key => $info) {

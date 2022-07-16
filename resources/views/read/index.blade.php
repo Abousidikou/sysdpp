@@ -40,8 +40,15 @@
                                     </select>
                                 </div>
                                 @endforeach
+                                
                                 <div class="col-md-3">
-                                    <input type="submit" class="btn btn-success btn-md" value="Filtrer">
+                                    <button type="submit"  name="filter" class="btn btn-success btn-md" value="0"> Filtrer </button>
+                                    @if($isPlus)
+                                        <button type="submit"  name="plus" class="btn btn-info btn-md" value="{{ $last_id +1 }}"> Voir Plus </button>
+                                    @endif
+                                    @if($last_id > 0)
+                                            <button type="submit"  name="plus" class="btn btn-info btn-md" value="{{ $last_id }}">Arrière</button>
+                                    @endif
                                 </div>
                             </div>
                         </form>
@@ -92,6 +99,9 @@
                             <a href="{{route('graph.data', ['indicator' => $id_indicator, 'subdomain' => $id_subdomain])}}" class="btn bg-warning waves-effect" title="Cliquer pour voir le graphe">Voir graphe</a>
 
                             <a href="{{route('export.data', ['indicator' => $id_indicator, 'subdomain' => $id_subdomain])}}" class="btn bg-green waves-effect">Exporter en Excel</a>
+
+
+                            
 
                             @if (session('path'))
 

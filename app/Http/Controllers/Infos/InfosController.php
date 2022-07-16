@@ -31,14 +31,26 @@ class InfosController extends Controller
         //$this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $infos = Data::all();
+        $last_id = intval($request->get('last_id', '0'));
+        $infos = null;
+        $isPlus = true;
         $domain = null;
+        $off = 500;
         if(Auth::user()->id_structure != NULL) {
-            $infos = Data::where('id_user', Auth::user()->id)->get();
+            $total = Data::where('id_user', Auth::user()->id)->count();
+            $infos = Data::where('id_user', Auth::user()->id)->orderBy('id','asc')->offset($last_id * $off)->limit($off)->get();
+            $isPlus = (($total - ($last_id * $off) - $infos->count()) >  0) ? true : false;
             $domain = Auth::user()->structure->subdomain[0]->domain->wording;
+        }else{
+            $total = Data::count();
+            $infos = Data::orderBy('id','asc')->offset($last_id * $off)->limit($off)->get();
+            $isPlus = (($total - ($last_id * $off) - $infos->count()) >  0) ? true : false;
+            $domain = null;
         }
+
+        //dd($infos);
 
         foreach($infos as $info)
         {
@@ -66,8 +78,7 @@ class InfosController extends Controller
             $info->date_start = date_format(date_create($info->date_start),'d-m-Y');
             $info->date_end = date_format(date_create($info->date_end),'d-m-Y');
         }
-
-        return view('admin.info.infos',compact('infos', 'domain'));
+        return view('admin.info.infos',compact('infos', 'domain','last_id','isPlus'));
     }
 
     public function showMoreDetails(Request $request)

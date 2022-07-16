@@ -159,6 +159,13 @@
                                     <input type="text" value="" name="mdels" id="mdels" />
                                     {{ csrf_field() }}
                                 </form>
+                            <br>
+                            @if($isPlus)
+                                <a href="{{ route('infos',['last_id' => $last_id + 1 ]) }}" class="btn bg-blue waves-effect">Voir Plus</a>
+                            @endif
+                            @if($last_id > 0)
+                                <a href="{{ route('infos',['last_id' => $last_id  ]) }}" class="btn bg-blue waves-effect">Arrière</a>
+                            @endif
                         </caption>
 
                     </table>

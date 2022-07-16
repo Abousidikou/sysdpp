@@ -54,11 +54,12 @@ class HomeController extends Controller
             $dataStatArray[] = array('label' => $dom, 'value' => $value);
             $i++;
         }
-
+        //dd($dataStatArray);
         $infos = Data::orderBy('id','desc')->limit(5)->get();
-
+        //dd($infos);
         foreach($infos as $info)
         {
+
             $info->userfn = $info->user->name; 
             $info->indicat = $info->indicator->wording; 
 
@@ -83,7 +84,6 @@ class HomeController extends Controller
             $info->date_start = date_format(date_create($info->date_start),'d-m-Y');
             $info->date_end = date_format(date_create($info->date_end),'d-m-Y');
         }
-
         return view('index',compact('numberOfIndicators','numberOfTypes','numberOfLevels','numberOfData','dataStatArray','infos'));
     }
 
@@ -109,8 +109,9 @@ class HomeController extends Controller
                 $domainArray[] = $domain;
                 $domainData[] = 1;
             }
-        }
 
+        }
+        
         return array('dom' => $domainArray, 'dat' => $domainData);
     }
 
@@ -130,7 +131,7 @@ class HomeController extends Controller
             $dataStatArray[] = array('label' => $dom, 'value' => $value);
             $i++;
         }
-
+        //dd($dataStatArray);
         return json_encode($dataStatArray);
     }
 }

@@ -27,7 +27,8 @@
                     {{csrf_field()}}
                     <div class="col-md-8">
                       <div class="body">
-                        <h4 class="text-center">Sélectionner les niveaux de désagrégation de votre choix</h4>
+                        <h4 class="text-center">Sélectionner les niveaux de désagrégation de votre  {{ request()->get('status')  }}</h4>
+
                         <select id="optgroup" class="ms" multiple="multiple" name="clevels[]">
                           @foreach ($infoArray as $info)
                             <option value="{{$info->lvhash}}">{{implode('-', $info->levels)}}</option>
@@ -37,6 +38,7 @@
                     </div>
                     <div class="col-md-2">
                       <input type="submit" class="form-control btn btn-info btn-md" value="Ok" />
+                      
                     </div>
                     <div class="col-md-2">
                       <a href="{{action('ReadController@readIndicators',['id' => $indicator->id, 'subdomain' => $subdomain->id])}}" class="btn btn-warning btn-md">Retour au tableau</a>

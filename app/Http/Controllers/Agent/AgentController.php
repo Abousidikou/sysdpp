@@ -20,11 +20,16 @@ class AgentController extends Controller
     public function index()
     {
         $agents = User::where('id','>',1)->get();
+        $i = 0;
         foreach($agents as $agent)
         {
-            $agent->struct = $agent->structure->wording; 
+            if($agent->structure){
+                $agent->struct = $agent->structure->wording; 
+            }
+            
+            $i += 1;    
         }
-
+        //dd($agents);
         return view('admin.agent.agents',compact('agents')); 
     }
 
